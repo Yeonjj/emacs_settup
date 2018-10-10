@@ -52,7 +52,9 @@ values."
      spell-checking
      ;; syntax-checking
      ;; version-control
+     theming ;;do I really need it?
      )
+
    ;; List of additional packages that will be installed without being
    ;; wrapped in a layer. If you need some configuration for these
    ;; packages, then consider creating a layer. You can also put the
@@ -295,8 +297,49 @@ values."
    ;; (default nil)
    dotspacemacs-whitespace-cleanup nil
    dotspacemacs-themes '(minimal)
-
    ))
+
+(defun save-framegeometry ()
+  "Gets the current frame's geometry and saves to ~/.emacs.d/framegeometry."
+  (let (
+        (framegeometry-left (frame-parameter (selected-frame) 'left))
+        (framegeometry-top (frame-parameter (selected-frame) 'top))
+        (framegeometry-width (frame-parameter (selected-frame) 'width))
+        (framegeometry-height (frame-parameter (selected-frame) 'height))
+        (framegeometry-file (expand-file-name "~/.emacs.d/framegeometry"))
+        )
+
+    (when (not (number-or-marker-p framegeometry-left))
+      (setq framegeometry-left 0))
+    (when (not (number-or-marker-p framegeometry-top))
+      (setq framegeometry-top 0))
+    (when (not (number-or-marker-p framegeometry-width))
+      (setq framegeometry-width 0))
+    (when (not (number-or-marker-p framegeometry-height))
+      (setq framegeometry-height 0))
+
+    (with-temp-buffer
+      (insert
+       ";;; This is the previous emacs frame's geometry.\n"
+       ";;; Last generated " (current-time-string) ".\n"
+       "(setq initial-frame-alist\n"
+       "      '(\n"
+       (format "        (top . %d)\n" (max framegeometry-top 0))
+       (format "        (left . %d)\n" (max framegeometry-left 0))
+       (format "        (width . %d)\n" (max framegeometry-width 0))
+       (format "        (height . %d)))\n" (max framegeometry-height 0)))
+      (when (file-writable-p framegeometry-file)
+        (write-file framegeometry-file))))
+  )
+
+(defun load-framegeometry ()
+  "Loads ~/.emacs.d/framegeometry which should load the previous frame's
+geometry."
+  (let ((framegeometry-file (expand-file-name "~/.emacs.d/framegeometry")))
+    (when (file-readable-p framegeometry-file)
+      (load-file framegeometry-file)))
+  )
+
 
 (defun dotspacemacs/user-init ()
   "Initialization function for user code.
@@ -307,6 +350,11 @@ executes.
 before packages are loaded. If you are unsure, you should try in setting them in
 `dotspacemacs/user-config' first."
   (setq ispell-program-name "/usr/local/bin/aspell")
+  (if window-system
+      (progn
+        (add-hook 'after-init-hook 'load-framegeometry)
+        (add-hook 'kill-emacs-hook 'save-framegeometry))
+    )
   )
 
 (defun dotspacemacs/user-config ()
@@ -325,22 +373,48 @@ you should place your code here."
 
   ;;  (set-fringe-mode 0)
   (set-fringe-mode '(1 . 1))
-  (set-face-attribute 'font-lock-builtin-face nil :foreground "#a58e6b" ':font "Liberation Mono")
-  (set-face-attribute 'font-lock-comment-face nil :foreground "gray45" ':font "Liberation Mono")
-  (set-face-attribute 'font-lock-constant-face nil :foreground "#5f702f")
-  (set-face-attribute 'font-lock-doc-face nil :foreground "gray50" ':font "Liberation Mono")
-  (set-face-attribute 'font-lock-function-name-face nil :foreground "#a58e6b" ':font "Didot")
-  (set-face-attribute 'font-lock-keyword-face nil :foreground "#9e7724" ':font "Liberation Mono")
-  (set-face-attribute 'font-lock-string-face nil :foreground "#5f702f" ':font "Didot")
-  (set-face-attribute 'font-lock-type-face nil :foreground "#a58e6b" ':font "Liberation Mono" )
-;;  (set-face-attribute 'font-lock-type-face nil :font "Liberation Mono")
 
-  (set-face-attribute 'font-lock-variable-name-face nil :foreground "#a58e6b" ':font "Liberation Mono")
+
+;;  (set-face-attribute 'font-lock-builtin-face nil :foreground "#a58e6b" ':font "Liberation Mono")
+
+;;  (set-face-attribute 'font-lock-comment-face nil :foreground "gray45" ':font "Liberation Mono")
+;;  (set-face-attribute 'font-lock-constant-face nil :foreground "#5f702f")
+;;  (set-face-attribute 'font-lock-doc-face nil :foreground "gray50" ':font "Liberation Mono")
+;;  (set-face-attribute 'font-lock-function-name-face nil :foreground "#a58e6b" ':font "Didot")
+;;  (set-face-attribute 'font-lock-keyword-face nil :foreground "#9e7724" ':font "Liberation Mono")
+;;  (set-face-attribute 'font-lock-string-face nil :foreground "#5f702f" ':font "Didot")
+;;  (set-face-attribute 'font-lock-type-face nil :foreground "#a58e6b" ':font "Liberation Mono" )
+;;  (set-face-attribute 'font-lock-variable-name-face nil :foreground "#a58e6b" ':font "Liberation Mono")
 
   (set-foreground-color "#93836b")
   (set-background-color "#161616")
   (set-cursor-color "DarkRed")
   (setq powerline-default-separator 'nil)
+  ;; set through emacs helper.
+
+;;  (custom-set-faces
+;;
+;;   ;; custom-set-faces was added by Custom.
+;;   ;; If you edit it by hand, you could mess it up, so be careful.
+;;   ;; Your init file should contain only one such instance.
+;;   ;; If there is more than one, they won't work right.
+;;   '(default ((((class color) (min-colors 89)) (:background "grey10" :foreground "grey90"))))
+;;   '(font-lock-builtin-face ((t (:foreground "#a58e6b" :slant normal :weight ultra-light :height 130 :width normal :foundry "nil" :family "Liberation Mono"))))
+;;   '(font-lock-comment-delimiter-face ((t (:foreground "gray24"))))
+;;   '(font-lock-type-face ((t (:foreground "burlywood4" :slant italic :weight normal :height 130 :width normal :foundry "nil" :family "Liberation Mono"))))
+;;   '(helm-buffer-directory ((t (:foreground "DarkOliveGreen4"))))
+;;   '(helm-ff-directory ((t (:foreground "DarkOliveGreen4"))))
+;;
+;;  ;;----------------------------------------------------------------------------------------
+;;
+;;   '(font-lock-comment-face ((t (:foreground "gray45" :font "Liberation Mono"))))
+;;   '(font-lock-constant-face ((t (:foreground "#5f702f"))))
+;;	 '(font-lock-doc-face ((t (:foreground "gray50" :font "Liberation Mono"))))
+;;	 '(font-lock-function-name-face ((t (:foreground "#a58e6b" :font "Didot"))))
+;;	 '(font-lock-keyword-face ((t (:foreground "#9e7724" :font "Liberation Mono"))))
+;;	 '(font-lock-string-face ((t (:foreground "#5f702f" :font "Didot"))))
+;;	 '(font-lock-variable-name-face ((t (:foreground "#a58e6b" :font "Liberation Mono"))))
+;;   )
   )
 
 ;; Do not write anything past this comment. This is where Emacs will
@@ -354,14 +428,53 @@ you should place your code here."
    ["#0a0814" "#f2241f" "#67b11d" "#b1951d" "#4f97d7" "#a31db1" "#28def0" "#b2b2b2"])
  '(package-selected-packages
    (quote
-    (web-mode tagedit slim-mode scss-mode sass-mode pug-mode helm-css-scss haml-mode emmet-mode company-web web-completion-data org-projectile org-category-capture org-present org-pomodoro alert log4e gntp org-mime org-download htmlize gnuplot helm-company helm-c-yasnippet fuzzy flyspell-correct-helm flyspell-correct company-statistics company auto-yasnippet yasnippet auto-dictionary ac-ispell auto-complete yaml-mode mmm-mode markdown-toc markdown-mode gh-md smeargle orgit magit-gitflow helm-gitignore gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link evil-magit magit magit-popup git-commit ghub treepy graphql with-editor ws-butler winum which-key volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spaceline powerline restart-emacs request rainbow-delimiters popwin persp-mode pcre2el paradox spinner org-plus-contrib org-bullets open-junk-file neotree move-text macrostep lorem-ipsum linum-relative link-hint indent-guide hydra hungry-delete hl-todo highlight-parentheses highlight-numbers parent-mode highlight-indentation helm-themes helm-swoop helm-projectile helm-mode-manager helm-make projectile pkg-info epl helm-flx helm-descbinds helm-ag google-translate golden-ratio flx-ido flx fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-lisp-state smartparens evil-indent-plus evil-iedit-state iedit evil-exchange evil-escape evil-ediff evil-args evil-anzu anzu evil goto-chg undo-tree eval-sexp-fu highlight elisp-slime-nav dumb-jump f dash s diminish define-word column-enforce-mode clean-aindent-mode bind-map bind-key auto-highlight-symbol auto-compile packed aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line helm avy helm-core popup async))))
+    (web-mode tagedit slim-mode scss-mode sass-mode pug-mode helm-css-scss haml-mode emmet-mode company-web web-completion-data org-projectile org-category-capture org-present org-pomodoro alert log4e gntp org-mime org-download htmlize gnuplot helm-company helm-c-yasnippet fuzzy flyspell-correct-helm flyspell-correct company-statistics company auto-yasnippet yasnippet auto-dictionary ac-ispell auto-complete yaml-mode mmm-mode markdown-toc markdown-mode gh-md smeargle orgit magit-gitflow helm-gitignore gitignore-mod e gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link evil-magit magit magit-popup git-commit ghub treepy graphql with-editor ws-butler winum which-key volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spaceline powerline restart-emacs request rainbow-delimiters popwin persp-mode pcre2el paradox spinner org-plus-con trib org-bullets open-junk-file neotree move-text macrostep lorem-ipsum linum-relative link-hint indent-guide hydra hungry-delete hl-todo highlight-parentheses highlight-numbers parent-mode highlight-indentation helm-themes helm-swoop helm-projectile helm-mode-manager helm-make projectile pkg-info epl helm-flx helm-descbinds helm-ag google-translate golden-ratio flx-ido flx fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-lisp-state smartparens evil-indent-plus evil-iedit-state iedit evil-exchange evil-escape evil-ediff evil-args evil-anzu anzu evil goto-chg undo-tree eval-sexp-fu highlight elisp-slime-nav dumb-jump f dash s diminish define-word column-enforce-mode clean-aindent-mode bind-map bind-key auto-highlight-symbol auto-compile packed aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line helm avy helm-core popup async))))
+
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(default ((((class color) (min-colors 89)) (:background "grey10" :foreground "grey90"))))
- '(cursor ((t (:background "dark red" :inverse-video t))))
+ '(font-lock-builtin-face ((t (:foreground "#a58e6b" :slant normal :weight ultra-light :height 130 :width normal :foundry "nil" :family "Liberation Mono"))))
+ '(font-lock-comment-delimiter-face ((t (:foreground "gray24"))))
+ '(font-lock-comment-face ((t (:foreground "gray45" :font "Liberation Mono"))))
+ '(font-lock-constant-face ((t (:foreground "#5f702f"))))
+ '(font-lock-doc-face ((t (:foreground "gray50" :font "Liberation Mono"))))
+ '(font-lock-function-name-face ((t (:foreground "#a58e6b" :font "Didot"))))
+ '(font-lock-keyword-face ((t (:foreground "#9e7724" :font "Liberation Mono"))))
+ '(font-lock-string-face ((t (:foreground "#5f702f" :font "Didot"))))
+ '(font-lock-type-face ((t (:foreground "#a58e6b" :slant italic :weight normal :height 130 :width normal :foundry "nil" :family "Liberation Mono"))))
+ '(font-lock-variable-name-face ((t (:foreground "#a58e6b" :font "Liberation Mono"))))
  '(helm-buffer-directory ((t (:foreground "DarkOliveGreen4"))))
  '(helm-ff-directory ((t (:foreground "DarkOliveGreen4"))))
- '(helm-ff-dotted-directory ((t (:inherit helm-ff-directory)))))
+ '(powerline-active0 ((t (:background "gray27" :foreground "NavajoWhite3"))))
+ '(powerline-active1 ((t (:inherit mode-line :background "grey17" :foreground "gray79" :height 1)))))
+
+
+;;   ;; Get color-theme-solarized working. It is specified as an additional package
+;;   ;; above. First we setup some theme modifications - we must do this *before*
+;;   ;; we load the theme. Note that the color-theme-solarized package appears in
+;;   ;; the list of themes as plain old 'solarized'. (setq theming-modifications '((solarized
+;;   ;; Provide a sort of "on-off" modeline whereby the current buffer has a nice
+;;   ;; bright blue background, and all the others are in cream.
+;;   ;; TODO: Change to use variables here. However, got error:
+;;   ;; (Spacemacs) Error in dotspacemacs/user-config: Wrong type argument: stringp, pd-blue
+
+;;   (mode-line :foreground "#e9e2cb" :background "#2075c7" :inverse-video nil)
+;;   (powerline-active1 :foreground "#e9e2cb" :background "#2075c7" :inverse-video nil)
+;;   (powerline-active2 :foreground "#e9e2cb" :background "#2075c7" :inverse-video nil)
+;;   (mode-line-inactive :foreground "#2075c7" :background "#e9e2cb" :inverse-video nil)
+;;   (powerline-inactive1 :foreground "#2075c7" :background "#e9e2cb" :inverse-video nil)
+;;   (powerline-inactive2 :foreground "#2075c7" :background "#e9e2cb" :inverse-video nil)
+
+;;   ;; Make a really prominent helm selection line.
+;;   (helm-selection :foreground "white" :background "red" :inverse-video nil)
+
+;;   ;; See comment above about dotspacemacs-colorize-cursor-according-to-state.
+;;   (cursor :background "#b58900") )))
+
+;;   (set-terminal-parameter nil 'background-mode 'dark)
+;;   (set-frame-parameter nil 'background-mode 'dark)
+;;   (spacemacs/load-theme 'solarized)
+
