@@ -31,35 +31,46 @@ values."
    ;; List of configuration layers to load.
    dotspacemacs-configuration-layers
    '(
+     ;; react
      html
-     yaml
      markdown
+     ;;javascript
      ;; ----------------------------------------------------------------
      ;; Example of useful layers you may want to use right away.
      ;; Uncomment some layer names and press <SPC f e R> (Vim style) or
      ;; <M-m f e R> (Emacs style) to install them.
      ;; ----------------------------------------------------------------
-     helm
-     auto-completion
+     ivy
+     ;; auto-completion
      ;; better-defaults
      emacs-lisp
      git
-     markdown
-     org
+     ;; markdown
+     ;; org
      ;; (shell :variables
      ;;        shell-default-height 30
      ;;        shell-default-position 'bottom)
-     spell-checking
+     ;; spell-checking
      ;; syntax-checking
      ;; version-control
-     theming ;;do I really need it?
+     plantuml
      )
-
    ;; List of additional packages that will be installed without being
    ;; wrapped in a layer. If you need some configuration for these
    ;; packages, then consider creating a layer. You can also put the
    ;; configuration in `dotspacemacs/user-config'.
-   dotspacemacs-additional-packages '()
+   dotspacemacs-additional-packages '(js2-mode
+                                      js2-refactor
+                                      xref-js2
+                                      company
+                                      company-tern
+                                      ag
+                                      indium
+                                      json-mode
+                                      skewer-mode
+                                      nodejs-repl
+                                      )
+
    ;; A list of packages that cannot be updated.
    dotspacemacs-frozen-packages '()
    ;; A list of packages that will not be installed and loaded.
@@ -71,7 +82,7 @@ values."
    ;; `used-but-keep-unused' installs only the used packages but won't uninstall
    ;; them if they become unused. `all' installs *all* packages supported by
    ;; Spacemacs and never uninstall them. (default is `used-only')
-   dotspacemacs-install-packages 'used-only))
+   dotspacemacs-install-packages 'used-but-keep-unused))
 
 (defun dotspacemacs/init ()
   "Initialization function.
@@ -131,8 +142,7 @@ values."
    ;; List of themes, the first of the list is loaded when spacemacs starts.
    ;; Press <SPC> T n to cycle to the next theme in the list (works great
    ;; with 2 themes variants, one dark and one light)
-   dotspacemacs-themes '(spacemacs-dark
-                         spacemacs-light)
+   dotspacemacs-themes '( rebecca )
    ;; If non nil the cursor color matches the state color in GUI Emacs.
    dotspacemacs-colorize-cursor-according-to-state nil
    ;; Default font, or prioritized list of fonts. `powerline-scale' allows to
@@ -140,7 +150,7 @@ values."
    dotspacemacs-default-font '("Source Code Pro"
                                :size 13
                                :weight ultra-light
-                               :Width ultra-condensed
+                               :width ultra-condensed
                                :powerline-scale 1.1)
    ;; The leader key
    dotspacemacs-leader-key "SPC"
@@ -296,125 +306,85 @@ values."
    ;; delete only whitespace for changed lines or `nil' to disable cleanup.
    ;; (default nil)
    dotspacemacs-whitespace-cleanup nil
-   dotspacemacs-themes '(minimal)
    ))
-
-(defun save-framegeometry ()
-  "Gets the current frame's geometry and saves to ~/.emacs.d/framegeometry."
-  (let (
-        (framegeometry-left (frame-parameter (selected-frame) 'left))
-        (framegeometry-top (frame-parameter (selected-frame) 'top))
-        (framegeometry-width (frame-parameter (selected-frame) 'width))
-        (framegeometry-height (frame-parameter (selected-frame) 'height))
-        (framegeometry-file (expand-file-name "~/.emacs.d/framegeometry"))
-        )
-
-    (when (not (number-or-marker-p framegeometry-left))
-      (setq framegeometry-left 0))
-    (when (not (number-or-marker-p framegeometry-top))
-      (setq framegeometry-top 0))
-    (when (not (number-or-marker-p framegeometry-width))
-      (setq framegeometry-width 0))
-    (when (not (number-or-marker-p framegeometry-height))
-      (setq framegeometry-height 0))
-
-    (with-temp-buffer
-      (insert
-       ";;; This is the previous emacs frame's geometry.\n"
-       ";;; Last generated " (current-time-string) ".\n"
-       "(setq initial-frame-alist\n"
-       "      '(\n"
-       (format "        (top . %d)\n" (max framegeometry-top 0))
-       (format "        (left . %d)\n" (max framegeometry-left 0))
-       (format "        (width . %d)\n" (max framegeometry-width 0))
-       (format "        (height . %d)))\n" (max framegeometry-height 0)))
-      (when (file-writable-p framegeometry-file)
-        (write-file framegeometry-file))))
-  )
-
-(defun load-framegeometry ()
-  "Loads ~/.emacs.d/framegeometry which should load the previous frame's
-geometry."
-  (let ((framegeometry-file (expand-file-name "~/.emacs.d/framegeometry")))
-    (when (file-readable-p framegeometry-file)
-      (load-file framegeometry-file)))
-  )
-
 
 (defun dotspacemacs/user-init ()
   "Initialization function for user code.
-
 It is called immediately after `dotspacemacs/init', before layer configuration
 executes.
  This function is mostly useful for variables that need to be set
 before packages are loaded. If you are unsure, you should try in setting them in
 `dotspacemacs/user-config' first."
-  (setq ispell-program-name "/usr/local/bin/aspell")
-  (if window-system
-      (progn
-        (add-hook 'after-init-hook 'load-framegeometry)
-        (add-hook 'kill-emacs-hook 'save-framegeometry))
-    )
   )
+
+
 
 (defun dotspacemacs/user-config ()
   "Configuration function for user code.
 This function is called at the very end of Spacemacs initialization after
 layers configuration.
+
 This is the place where most of your configurations should be done. Unless it is
 explicitly specified that a variable should be set before a package is loaded,
 you should place your code here."
-
-
-;;  (add-to-list 'default-frame-alist '(font . "Liberation Mono-11.5"))
-;;  (set-face-attribute 'default t :font "Liberation Mono-11.5")
-;;  (set-face-attribute 'default nil :height 130)
   (setq ns-use-srgb-colorspace nil)
+  (set-cursor-color "#ff79c6")
 
-  ;;  (set-fringe-mode 0)
-  (set-fringe-mode '(1 . 1))
+  ;;  (setq spaceline-highlight-face-func 'spaceline-highlight-face-evil-state)
+
+  (setq spaceline-highlight-face-func 'spaceline-highlight-face-evil-state)
+  (set-face-attribute 'spaceline-evil-emacs nil :background "DeepPink2")
+  (set-face-attribute 'spaceline-evil-insert nil :background "DeepPink2")
+  (set-face-attribute 'spaceline-evil-motion nil :background "DeepPink2")
+  (set-face-attribute 'spaceline-evil-normal nil :background "DeepPink2")
+  (set-face-attribute 'spaceline-evil-replace nil :background "DeepPink2")
+  (set-face-attribute 'spaceline-evil-visual nil :background "DeepPink2")
+
+  (require 'js2-mode)
 
 
-;;  (set-face-attribute 'font-lock-builtin-face nil :foreground "#a58e6b" ':font "Liberation Mono")
+  (add-to-list 'auto-mode-alist '("\\.js\\'" . js2-mode))
 
-;;  (set-face-attribute 'font-lock-comment-face nil :foreground "gray45" ':font "Liberation Mono")
-;;  (set-face-attribute 'font-lock-constant-face nil :foreground "#5f702f")
-;;  (set-face-attribute 'font-lock-doc-face nil :foreground "gray50" ':font "Liberation Mono")
-;;  (set-face-attribute 'font-lock-function-name-face nil :foreground "#a58e6b" ':font "Didot")
-;;  (set-face-attribute 'font-lock-keyword-face nil :foreground "#9e7724" ':font "Liberation Mono")
-;;  (set-face-attribute 'font-lock-string-face nil :foreground "#5f702f" ':font "Didot")
-;;  (set-face-attribute 'font-lock-type-face nil :foreground "#a58e6b" ':font "Liberation Mono" )
-;;  (set-face-attribute 'font-lock-variable-name-face nil :foreground "#a58e6b" ':font "Liberation Mono")
+  ;; Better imenu
+  (add-hook 'js2-mode-hook #'js2-imenu-extras-mode)
 
-  (set-foreground-color "#93836b")
-  (set-background-color "#161616")
-  (set-cursor-color "DarkRed")
-  (setq powerline-default-separator 'nil)
-  ;; set through emacs helper.
+  (require 'js2-refactor)
+  (require 'xref-js2)
 
-;;  (custom-set-faces
-;;
-;;   ;; custom-set-faces was added by Custom.
-;;   ;; If you edit it by hand, you could mess it up, so be careful.
-;;   ;; Your init file should contain only one such instance.
-;;   ;; If there is more than one, they won't work right.
-;;   '(default ((((class color) (min-colors 89)) (:background "grey10" :foreground "grey90"))))
-;;   '(font-lock-builtin-face ((t (:foreground "#a58e6b" :slant normal :weight ultra-light :height 130 :width normal :foundry "nil" :family "Liberation Mono"))))
-;;   '(font-lock-comment-delimiter-face ((t (:foreground "gray24"))))
-;;   '(font-lock-type-face ((t (:foreground "burlywood4" :slant italic :weight normal :height 130 :width normal :foundry "nil" :family "Liberation Mono"))))
-;;   '(helm-buffer-directory ((t (:foreground "DarkOliveGreen4"))))
-;;   '(helm-ff-directory ((t (:foreground "DarkOliveGreen4"))))
-;;
-;;  ;;----------------------------------------------------------------------------------------
-;;
-;;   '(font-lock-comment-face ((t (:foreground "gray45" :font "Liberation Mono"))))
-;;   '(font-lock-constant-face ((t (:foreground "#5f702f"))))
-;;	 '(font-lock-doc-face ((t (:foreground "gray50" :font "Liberation Mono"))))
-;;	 '(font-lock-function-name-face ((t (:foreground "#a58e6b" :font "Didot"))))
-;;	 '(font-lock-keyword-face ((t (:foreground "#9e7724" :font "Liberation Mono"))))
-;;	 '(font-lock-string-face ((t (:foreground "#5f702f" :font "Didot"))))
-;;	 '(font-lock-variable-name-face ((t (:foreground "#a58e6b" :font "Liberation Mono"))))
-;;   )
+  (add-hook 'js2-mode-hook #'js2-refactor-mode)
+  (js2r-add-keybindings-with-prefix "C-c C-r")
+  (define-key js2-mode-map (kbd "C-k") #'js2r-kill)
+
+  ;; js-mode (which js2 is based on) binds "M-." which conflicts with xref, so
+  ;; unbind it.
+  (define-key js-mode-map (kbd "M-.") nil)
+
+  (add-hook 'js2-mode-hook (lambda ()
+                             (add-hook 'xref-backend-functions #'xref-js2-xref-backend nil t)))
+
+  (require 'company)
+  (require 'company-tern)
+
+  (add-to-list 'company-backends 'company-tern)
+  (add-hook 'js2-mode-hook (lambda ()
+                             (tern-mode)
+                             (company-mode)))
+  (require 'web-mode)
+  (add-hook 'web-mode-hook (lambda ()
+                             (tern-mode)
+                             (company-mode)))
+
+  ;; Disable completion keybindings, as it use xref-js2 instead
+  (define-key tern-mode-keymap (kbd "M-.") nil)
+  (define-key tern-mode-keymap (kbd "M-,") nil)
+
+  (require 'json-mode)
+
+  (defun other-window-reverse()
+    (interactive)
+    (other-window -1))
+  (global-set-key (kbd "C->") 'other-window)
+  (global-set-key (kbd "C-<") 'other-window-reverse)
   )
 
 ;; Do not write anything past this comment. This is where Emacs will
@@ -424,57 +394,23 @@ you should place your code here."
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(ansi-color-names-vector
-   ["#0a0814" "#f2241f" "#67b11d" "#b1951d" "#4f97d7" "#a31db1" "#28def0" "#b2b2b2"])
  '(package-selected-packages
    (quote
-    (web-mode tagedit slim-mode scss-mode sass-mode pug-mode helm-css-scss haml-mode emmet-mode company-web web-completion-data org-projectile org-category-capture org-present org-pomodoro alert log4e gntp org-mime org-download htmlize gnuplot helm-company helm-c-yasnippet fuzzy flyspell-correct-helm flyspell-correct company-statistics company auto-yasnippet yasnippet auto-dictionary ac-ispell auto-complete yaml-mode mmm-mode markdown-toc markdown-mode gh-md smeargle orgit magit-gitflow helm-gitignore gitignore-mod e gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link evil-magit magit magit-popup git-commit ghub treepy graphql with-editor ws-butler winum which-key volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spaceline powerline restart-emacs request rainbow-delimiters popwin persp-mode pcre2el paradox spinner org-plus-con trib org-bullets open-junk-file neotree move-text macrostep lorem-ipsum linum-relative link-hint indent-guide hydra hungry-delete hl-todo highlight-parentheses highlight-numbers parent-mode highlight-indentation helm-themes helm-swoop helm-projectile helm-mode-manager helm-make projectile pkg-info epl helm-flx helm-descbinds helm-ag google-translate golden-ratio flx-ido flx fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-lisp-state smartparens evil-indent-plus evil-iedit-state iedit evil-exchange evil-escape evil-ediff evil-args evil-anzu anzu evil goto-chg undo-tree eval-sexp-fu highlight elisp-slime-nav dumb-jump f dash s diminish define-word column-enforce-mode clean-aindent-mode bind-map bind-key auto-highlight-symbol auto-compile packed aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line helm avy helm-core popup async))))
+    (plantuml-mode web-mode tagedit slim-mode scss-mode sass-mode pug-mode haml-mode emmet-mode nodejs-repl smeargle orgit magit-gitflow gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link evil-magit magit magit-popup git-commit ghub treepy graphql with-editor csharp-mode websocket mmm-mode markdown-toc markdown-mode gh-md intero hlint-refactor hindent haskell-snippets dante lcr flycheck company-ghci company-ghc ghc haskell-mode cmm-mode web-beautify livid-mode skewer-mode simple-httpd json-mode json-snatcher json-reformat js-doc coffee-mode dash-functional tern xref-js2 indium js2-refactor yasnippet multiple-cursors js2-mode company-tern company ag ws-butler winum which-key wgrep volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spaceline powerline smex restart-emacs request rainbow-delimiters popwin persp-mode pcre2el paradox spinner org-plus-contrib org-bullets open-junk-file neotree move-text macrostep lorem-ipsum linum-relative link-hint ivy-hydra indent-guide hydra hungry-delete hl-todo highlight-parentheses highlight-numbers parent-mode highlight-indentation helm-make helm helm-core google-translate golden-ratio flx-ido flx fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-lisp-state smartparens evil-indent-plus evil-iedit-state iedit evil-exchange evil-escape evil-ediff evil-args evil-anzu anzu evil goto-chg undo-tree eval-sexp-fu highlight elisp-slime-nav dumb-jump popup f dash s diminish define-word counsel-projectile projectile pkg-info epl counsel swiper ivy column-enforce-mode clean-aindent-mode bind-map bind-key auto-highlight-symbol auto-compile packed async aggressive-indent adaptive-wrap ace-window ace-link avy))))
+
 
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(default ((((class color) (min-colors 89)) (:background "grey10" :foreground "grey90"))))
- '(font-lock-builtin-face ((t (:foreground "#a58e6b" :slant normal :weight ultra-light :height 130 :width normal :foundry "nil" :family "Liberation Mono"))))
- '(font-lock-comment-delimiter-face ((t (:foreground "gray24"))))
- '(font-lock-comment-face ((t (:foreground "gray45" :font "Liberation Mono"))))
- '(font-lock-constant-face ((t (:foreground "#5f702f"))))
- '(font-lock-doc-face ((t (:foreground "gray50" :font "Liberation Mono"))))
- '(font-lock-function-name-face ((t (:foreground "#a58e6b" :font "Didot"))))
- '(font-lock-keyword-face ((t (:foreground "#9e7724" :font "Liberation Mono"))))
- '(font-lock-string-face ((t (:foreground "#5f702f" :font "Didot"))))
- '(font-lock-type-face ((t (:foreground "#a58e6b" :slant italic :weight normal :height 130 :width normal :foundry "nil" :family "Liberation Mono"))))
- '(font-lock-variable-name-face ((t (:foreground "#a58e6b" :font "Liberation Mono"))))
- '(helm-buffer-directory ((t (:foreground "DarkOliveGreen4"))))
- '(helm-ff-directory ((t (:foreground "DarkOliveGreen4"))))
- '(powerline-active0 ((t (:background "gray27" :foreground "NavajoWhite3"))))
- '(powerline-active1 ((t (:inherit mode-line :background "grey17" :foreground "gray79" :height 1)))))
-
-
-;;   ;; Get color-theme-solarized working. It is specified as an additional package
-;;   ;; above. First we setup some theme modifications - we must do this *before*
-;;   ;; we load the theme. Note that the color-theme-solarized package appears in
-;;   ;; the list of themes as plain old 'solarized'. (setq theming-modifications '((solarized
-;;   ;; Provide a sort of "on-off" modeline whereby the current buffer has a nice
-;;   ;; bright blue background, and all the others are in cream.
-;;   ;; TODO: Change to use variables here. However, got error:
-;;   ;; (Spacemacs) Error in dotspacemacs/user-config: Wrong type argument: stringp, pd-blue
-
-;;   (mode-line :foreground "#e9e2cb" :background "#2075c7" :inverse-video nil)
-;;   (powerline-active1 :foreground "#e9e2cb" :background "#2075c7" :inverse-video nil)
-;;   (powerline-active2 :foreground "#e9e2cb" :background "#2075c7" :inverse-video nil)
-;;   (mode-line-inactive :foreground "#2075c7" :background "#e9e2cb" :inverse-video nil)
-;;   (powerline-inactive1 :foreground "#2075c7" :background "#e9e2cb" :inverse-video nil)
-;;   (powerline-inactive2 :foreground "#2075c7" :background "#e9e2cb" :inverse-video nil)
-
-;;   ;; Make a really prominent helm selection line.
-;;   (helm-selection :foreground "white" :background "red" :inverse-video nil)
-
-;;   ;; See comment above about dotspacemacs-colorize-cursor-according-to-state.
-;;   (cursor :background "#b58900") )))
-
-;;   (set-terminal-parameter nil 'background-mode 'dark)
-;;   (set-frame-parameter nil 'background-mode 'dark)
-;;   (spacemacs/load-theme 'solarized)
+ '(default ((t (:inherit nil :stipple nil :background "#292a44" :foreground "#f1eff8" :inverse-video nil :box nil :strike-through nil :overline nil :underline nil :slant normal :weight thin :height 130 :foundry "nil" :family "Source Code Pro"))))
+ '(font-lock-builtin-face ((t (:slant normal :weight ultra-light :height 130 :width normal :foundry "nil" :family "Liberation Mono"))))
+ '(font-lock-comment-face ((t (:font "Liberation Mono"))))
+ '(font-lock-doc-face ((t (:font "Liberation Mono"))))
+ '(font-lock-keyword-face ((t (:font "Liberation Mono"))))
+ '(font-lock-string-face ((t (:font "Didot" :height 135))))
+ '(font-lock-type-face ((t (:slant italic :weight normal :height 130 :width normal :foundry "nil" :family "Liberation Mono"))))
+ '(font-lock-variable-name-face ((t (:font "Liberation Mono"))))
+ )
 
