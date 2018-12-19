@@ -65,10 +65,10 @@ values."
                                       company
                                       company-tern
                                       ag
-                                      indium
                                       json-mode
                                       skewer-mode
                                       nodejs-repl
+                                      indium
                                       )
 
    ;; A list of packages that cannot be updated.
@@ -327,9 +327,9 @@ layers configuration.
 This is the place where most of your configurations should be done. Unless it is
 explicitly specified that a variable should be set before a package is loaded,
 you should place your code here."
+  (setq mac-option-modifier 'meta)
   (setq ns-use-srgb-colorspace nil)
   (set-cursor-color "#ff79c6")
-
   ;;  (setq spaceline-highlight-face-func 'spaceline-highlight-face-evil-state)
 
   (setq spaceline-highlight-face-func 'spaceline-highlight-face-evil-state)
@@ -343,8 +343,8 @@ you should place your code here."
   (require 'js2-mode)
 
 
-  (add-to-list 'auto-mode-alist '("\\.js\\'" . js2-mode))
-
+  (add-to-list 'auto-mode-alist '("\\.js\\'" . web-mode))
+  (add-to-list 'auto-mode-alist '("\\.vue\\'" . web-mode))
   ;; Better imenu
   (add-hook 'js2-mode-hook #'js2-imenu-extras-mode)
 
@@ -360,6 +360,9 @@ you should place your code here."
   (define-key js-mode-map (kbd "M-.") nil)
 
   (add-hook 'js2-mode-hook (lambda ()
+                             (add-hook 'xref-backend-functions #'xref-js2-xref-backend nil t)))
+
+  (add-hook 'web-mode-hook (lambda ()
                              (add-hook 'xref-backend-functions #'xref-js2-xref-backend nil t)))
 
   (require 'company)
@@ -396,7 +399,7 @@ you should place your code here."
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
    (quote
-    (plantuml-mode web-mode tagedit slim-mode scss-mode sass-mode pug-mode haml-mode emmet-mode nodejs-repl smeargle orgit magit-gitflow gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link evil-magit magit magit-popup git-commit ghub treepy graphql with-editor csharp-mode websocket mmm-mode markdown-toc markdown-mode gh-md intero hlint-refactor hindent haskell-snippets dante lcr flycheck company-ghci company-ghc ghc haskell-mode cmm-mode web-beautify livid-mode skewer-mode simple-httpd json-mode json-snatcher json-reformat js-doc coffee-mode dash-functional tern xref-js2 indium js2-refactor yasnippet multiple-cursors js2-mode company-tern company ag ws-butler winum which-key wgrep volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spaceline powerline smex restart-emacs request rainbow-delimiters popwin persp-mode pcre2el paradox spinner org-plus-contrib org-bullets open-junk-file neotree move-text macrostep lorem-ipsum linum-relative link-hint ivy-hydra indent-guide hydra hungry-delete hl-todo highlight-parentheses highlight-numbers parent-mode highlight-indentation helm-make helm helm-core google-translate golden-ratio flx-ido flx fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-lisp-state smartparens evil-indent-plus evil-iedit-state iedit evil-exchange evil-escape evil-ediff evil-args evil-anzu anzu evil goto-chg undo-tree eval-sexp-fu highlight elisp-slime-nav dumb-jump popup f dash s diminish define-word counsel-projectile projectile pkg-info epl counsel swiper ivy column-enforce-mode clean-aindent-mode bind-map bind-key auto-highlight-symbol auto-compile packed async aggressive-indent adaptive-wrap ace-window ace-link avy))))
+    (indium plantuml-mode web-mode tagedit slim-mode scss-mode sass-mode pug-mode haml-mode emmet-mode nodejs-repl smeargle orgit magit-gitflow gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link evil-magit magit magit-popup git-commit ghub treepy graphql with-editor csharp-mode websocket mmm-mode markdown-toc markdown-mode gh-md intero hlint-refactor hindent haskell-snippets dante lcr flycheck company-ghci company-ghc ghc haskell-mode cmm-mode web-beautify livid-mode skewer-mode simple-httpd json-mode json-snatcher json-reformat js-doc coffee-mode dash-functional tern xref-js2 js2-refactor yasnippet multiple-cursors js2-mode company-tern company ag ws-butler winum which-key wgrep volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spaceline powerline smex restart-emacs request rainbow-delimiters popwin persp-mode pcre2el paradox spinner org-plus-contrib org-bullets open-junk-file neotree move-text macrostep lorem-ipsum linum-relative link-hint ivy-hydra indent-guide hydra hungry-delete hl-todo highlight-parentheses highlight-numbers parent-mode highlight-indentation helm-make helm helm-core google-translate golden-ratio flx-ido flx fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-lisp-state smartparens evil-indent-plus evil-iedit-state iedit evil-exchange evil-escape evil-ediff evil-args evil-anzu anzu evil goto-chg undo-tree eval-sexp-fu highlight elisp-slime-nav dumb-jump popup f dash s diminish define-word counsel-projectile projectile pkg-info epl counsel swiper ivy column-enforce-mode clean-aindent-mode bind-map bind-key auto-highlight-symbol auto-compile packed async aggressive-indent adaptive-wrap ace-window ace-link avy))))
 
 
 (custom-set-faces
@@ -411,6 +414,5 @@ you should place your code here."
  '(font-lock-keyword-face ((t (:font "Liberation Mono"))))
  '(font-lock-string-face ((t (:font "Didot" :height 135))))
  '(font-lock-type-face ((t (:slant italic :weight normal :height 130 :width normal :foundry "nil" :family "Liberation Mono"))))
- '(font-lock-variable-name-face ((t (:font "Liberation Mono"))))
- )
+ '(font-lock-variable-name-face ((t (:font "Liberation Mono")))))
 
